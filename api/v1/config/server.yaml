@@ -1,0 +1,3 @@
+package: winkedIn
+generate:
+  chi-server: true

@@ -1,0 +1,322 @@
+openapi: "3.0.0"
+info:
+  version: v1.0.0
+  title: winkedin profile management
+  contact:
+    name: WinkedIn
+    email: winkedin.india@gmail.com
+  description: onboarding and profile management api
+  license:
+    name: winkedIn
+    url: https://winkedin.in
+
+servers:
+  - url: https://<tbd>
+    description: Development server
+  - url: https://<tbd>
+    description: Staging server
+  - url: https://<tbd>
+    description: Production server
+
+security:
+  - BasicAuth: []
+
+paths:
+  /v1/users:
+    post:
+      summary: Creates a new user
+      operationId: createUsers
+      tags:
+        - Users
+      requestBody:
+        description: Create user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUsers"
+      responses:
+        "204":
+          $ref: "#/components/responses/CreateUsersResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/professionalInfo:
+    put:
+      summary: Update user's professional information
+      operationId: updateUsersProfessional
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Updates the user's professional information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUsersProfessionalInfo"
+      responses:
+          "204":
+            description: Successfully updated the user's professional information
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+          "403":
+            $ref: "#/components/responses/ForbiddenError"
+          "500":
+            $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/personalInfo:
+    put:
+      summary: Update user's personal information
+      operationId: updateUsersPersonal
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Updates the user's personal information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUsersPersonalInfo"
+      responses:
+          "204":
+            description: Successfully updated the user's personal information
+          "400":
+            $ref: "#/components/responses/BadRequestError"   
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+          "403":
+            $ref: "#/components/responses/ForbiddenError"
+          "500":
+            $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/preferences:
+    post:
+      summary: Add/Update user's preferences
+      operationId: updateUsersPreferences
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Add/Updates the user's preferences
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUsersPreferences"
+      responses:
+          "204":
+            description: Successfully updated the user's personal information
+          "400":
+            $ref: "#/components/responses/BadRequestError"
+          "401":
+            $ref: "#/components/responses/UnauthorizedError"
+          "403":
+            $ref: "#/components/responses/ForbiddenError"
+          "500":
+            $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/photos:
+    post:
+      summary: Upload user photos
+      operationId: uploadUserPhotos
+      tags:
+        - Users
+      parameters:
+         - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Upload multiple user photos (each photo max 10MB)
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UserPhotos"
+      responses:
+        "201":
+          description: Photos uploaded successfully
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: App ID and Secret credentials, base64 encoded
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string      
+    UserID:
+      type: string
+      format: uuid
+    Gender:
+      type: string
+      enum:
+        - Male
+        - Female
+        - Other
+      description: Gender options available for users
+    Preferences:
+      type: object
+      properties:
+        preferenceType:
+          type: string
+          example: drink
+        preferenceValue:
+          type: array
+          items:
+           $ref: "#/components/schemas/PreferenceValue"
+    PreferenceValue:
+      type: string
+      example: sober
+
+    CreateUsers:
+      type: object
+      properties:
+        linkedInToken:
+          type: string
+    UpdateUsersProfessionalInfo:
+      type: object
+      properties:
+        userid:
+          type: string
+          description: Unique identifier for the user
+        companyName:
+          type: string
+          description: Name of the user's company
+        jobTitle:
+          type: string
+          description: Job title of the user
+        industryType:
+          type: string
+          description: Industry in which the user works
+        education:
+          type: string
+          description: User's highest education level
+        college:
+          type: string
+          description: Name of the user's college/university
+        blockedCompanies:
+          type: array
+          description: List of companies the user wants to block
+          items:
+            type: string
+    UpdateUsersPersonalInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        mobileNumber:
+          type: string
+          description: User's mobile number
+        dob:
+          type: string
+          format: date
+          description: Date of birth (YYYY-MM-DD)
+        gender:
+          $ref: "#/components/schemas/Gender"
+        height:
+          type: number
+    UpdateUsersPreferences:
+      type: array
+      items:
+        $ref: "#/components/schemas/Preferences"
+    UserPhotos:
+      type: object
+      properties:
+        photos:
+          type: array
+          items:
+            type: string
+            format: binary
+          description: List of image files to be uploaded (each max 10MB)
+        defaultPhoto:
+          type: string
+          description: Filename of the photo to be set as default
+  parameters:
+    page:
+      name: page
+      in: query
+      description: Current page number
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+    limit:
+      name: limit
+      in: query
+      description: Limits the number of returned items
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 200
+    userID:
+      name: userID
+      in: path
+      description: ID of the current user
+      required: true
+      schema:
+        $ref: "#/components/schemas/UserID"
+
+  responses:
+    CreateUsersResponse: #204
+     description: user created
+           
+    BadRequestError: # 400
+      description: The request was unacceptable either due to an invalid/missing parameter or body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ForbiddenError: # 403
+      description: provided credentials lack required permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UnauthorizedError: # 401
+      description: Missing credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFoundError: # 404
+      description: The requested resource doesn't exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalServerError: # 500
+      description: Unknown server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
