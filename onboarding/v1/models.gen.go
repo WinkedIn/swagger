@@ -32,8 +32,27 @@ type Error struct {
 // Gender Gender options available for users
 type Gender string
 
+// GetItems defines model for GetItems.
+type GetItems struct {
+	ItemTypeID   ID      `json:"itemTypeID"`
+	ItemTypeName string  `json:"itemTypeName"`
+	Items        []Items `json:"items"`
+}
+
+// ID defines model for ID.
+type ID = openapi_types.UUID
+
+// InsertItems defines model for InsertItems.
+type InsertItems struct {
+	ItemTypeID *ID     `json:"itemTypeID,omitempty"`
+	NewItems   *string `json:"newItems,omitempty"`
+}
+
 // PreferenceValue defines model for PreferenceValue.
-type PreferenceValue = string
+type PreferenceValue struct {
+	Id   *ID     `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
 
 // Preferences defines model for Preferences.
 type Preferences struct {
@@ -43,6 +62,8 @@ type Preferences struct {
 
 // UpdateUsersPersonalInfo defines model for UpdateUsersPersonalInfo.
 type UpdateUsersPersonalInfo struct {
+	Caste *string `json:"caste,omitempty"`
+
 	// Dob Date of birth (YYYY-MM-DD)
 	Dob *openapi_types.Date `json:"dob,omitempty"`
 
@@ -50,11 +71,15 @@ type UpdateUsersPersonalInfo struct {
 	Email *openapi_types.Email `json:"email,omitempty"`
 
 	// Gender Gender options available for users
-	Gender *Gender  `json:"gender,omitempty"`
-	Height *float32 `json:"height,omitempty"`
+	Gender    *Gender   `json:"gender,omitempty"`
+	Height    *float32  `json:"height,omitempty"`
+	Hometown  *string   `json:"hometown,omitempty"`
+	Languages *[]string `json:"languages,omitempty"`
 
 	// MobileNumber User's mobile number
 	MobileNumber *string `json:"mobileNumber,omitempty"`
+	Religion     *string `json:"religion,omitempty"`
+	ZodiacSign   *string `json:"zodiacSign,omitempty"`
 }
 
 // UpdateUsersPreferences defines model for UpdateUsersPreferences.
@@ -79,13 +104,7 @@ type UpdateUsersProfessionalInfo struct {
 
 	// JobTitle Job title of the user
 	JobTitle *string `json:"jobTitle,omitempty"`
-
-	// Userid Unique identifier for the user
-	Userid *string `json:"userid,omitempty"`
 }
-
-// UserID defines model for UserID.
-type UserID = openapi_types.UUID
 
 // UserPhotos defines model for UserPhotos.
 type UserPhotos struct {
@@ -96,17 +115,133 @@ type UserPhotos struct {
 	Photos *[]openapi_types.File `json:"photos,omitempty"`
 }
 
+// UsersPersonalInfo defines model for UsersPersonalInfo.
+type UsersPersonalInfo struct {
+	Age   *float32 `json:"age,omitempty"`
+	Caste *string  `json:"caste,omitempty"`
+
+	// Dob Date of birth (YYYY-MM-DD)
+	Dob *openapi_types.Date `json:"dob,omitempty"`
+
+	// Email User's email address
+	Email     *openapi_types.Email `json:"email,omitempty"`
+	FirstName string               `json:"firstName"`
+
+	// Gender Gender options available for users
+	Gender    *Gender   `json:"gender,omitempty"`
+	Height    *float32  `json:"height,omitempty"`
+	Hometown  *string   `json:"hometown,omitempty"`
+	Languages *[]string `json:"languages,omitempty"`
+	LastName  string    `json:"lastName"`
+	Latitude  *string   `json:"latitude,omitempty"`
+	Longitude *string   `json:"longitude,omitempty"`
+
+	// MobileNumber User's mobile number
+	MobileNumber *string `json:"mobileNumber,omitempty"`
+	Religion     *string `json:"religion,omitempty"`
+	UserID       ID      `json:"userID"`
+	ZodiacSign   *string `json:"zodiacSign,omitempty"`
+}
+
+// UsersPreferences defines model for UsersPreferences.
+type UsersPreferences struct {
+	Preferences []Preferences `json:"preferences"`
+	UserID      ID            `json:"userID"`
+}
+
+// UsersProfessionalInfo defines model for UsersProfessionalInfo.
+type UsersProfessionalInfo struct {
+	// BlockedCompanies List of companies the user wants to block
+	BlockedCompanies *[]string `json:"blockedCompanies,omitempty"`
+
+	// College Name of the user's college/university
+	College     *string `json:"college,omitempty"`
+	CompanyName *string `json:"companyName,omitempty"`
+
+	// Education User's highest education level
+	Education *string `json:"education,omitempty"`
+
+	// IndustryType Industry in which the user works
+	IndustryType *string `json:"industryType,omitempty"`
+
+	// JobTitle Job title of the user
+	JobTitle *string `json:"jobTitle,omitempty"`
+	UserID   ID      `json:"userID"`
+}
+
+// Items defines model for items.
+type Items struct {
+	Id   *ID     `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+// SendOTP defines model for sendOTP.
+type SendOTP struct {
+	Medium *string `json:"medium,omitempty"`
+	Value  *string `json:"value,omitempty"`
+}
+
+// VerifyOTP defines model for verifyOTP.
+type VerifyOTP struct {
+	Otp *float32 `json:"otp,omitempty"`
+}
+
+// VerifyPhoto defines model for verifyPhoto.
+type VerifyPhoto struct {
+	Photo       openapi_types.File `json:"photo"`
+	PosePhotoID ID                 `json:"posePhotoID"`
+}
+
+// PreferenceType defines model for PreferenceType.
+type PreferenceType = string
+
+// ItemType defines model for itemType.
+type ItemType = string
+
+// UserID defines model for userID.
+type UserID = ID
+
 // BadRequestError defines model for BadRequestError.
 type BadRequestError = Error
+
+// CreateUsersResponse defines model for CreateUsersResponse.
+type CreateUsersResponse = ID
 
 // ForbiddenError defines model for ForbiddenError.
 type ForbiddenError = Error
 
+// GetItemsResponse defines model for GetItemsResponse.
+type GetItemsResponse = GetItems
+
+// InsertItemsResponse defines model for InsertItemsResponse.
+type InsertItemsResponse = GetItems
+
 // InternalServerError defines model for InternalServerError.
 type InternalServerError = Error
 
+// NotFoundError defines model for NotFoundError.
+type NotFoundError = Error
+
 // UnauthorizedError defines model for UnauthorizedError.
 type UnauthorizedError = Error
+
+// UsersPersonalInfoResponse defines model for UsersPersonalInfoResponse.
+type UsersPersonalInfoResponse = UsersPersonalInfo
+
+// UsersPreferencesResponse defines model for UsersPreferencesResponse.
+type UsersPreferencesResponse = UsersPreferences
+
+// UsersProfessionalInfoResponse defines model for UsersProfessionalInfoResponse.
+type UsersProfessionalInfoResponse = UsersProfessionalInfo
+
+// GetUsersPreferencesParams defines parameters for GetUsersPreferences.
+type GetUsersPreferencesParams struct {
+	// PreferenceType preference type
+	PreferenceType *PreferenceType `form:"preferenceType,omitempty" json:"preferenceType,omitempty"`
+}
+
+// InsertItemsJSONRequestBody defines body for InsertItems for application/json ContentType.
+type InsertItemsJSONRequestBody = InsertItems
 
 // CreateUsersJSONRequestBody defines body for CreateUsers for application/json ContentType.
 type CreateUsersJSONRequestBody = CreateUsers
@@ -122,3 +257,12 @@ type UpdateUsersPreferencesJSONRequestBody = UpdateUsersPreferences
 
 // UpdateUsersProfessionalJSONRequestBody defines body for UpdateUsersProfessional for application/json ContentType.
 type UpdateUsersProfessionalJSONRequestBody = UpdateUsersProfessionalInfo
+
+// SendOTPJSONRequestBody defines body for SendOTP for application/json ContentType.
+type SendOTPJSONRequestBody = SendOTP
+
+// VerifyOTPJSONRequestBody defines body for VerifyOTP for application/json ContentType.
+type VerifyOTPJSONRequestBody = VerifyOTP
+
+// VerifyUserPhotosMultipartRequestBody defines body for VerifyUserPhotos for multipart/form-data ContentType.
+type VerifyUserPhotosMultipartRequestBody = VerifyPhoto

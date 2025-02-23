@@ -89,10 +89,21 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetItems request
+	GetItems(ctx context.Context, itemType ItemType, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsertItemsWithBody request with any body
+	InsertItemsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InsertItems(ctx context.Context, body InsertItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateUsersWithBody request with any body
 	CreateUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateUsers(ctx context.Context, body CreateUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetUsersPersonal request
+	GetUsersPersonal(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UpdateUsersPersonalWithBody request with any body
 	UpdateUsersPersonalWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -102,15 +113,70 @@ type ClientInterface interface {
 	// UploadUserPhotosWithBody request with any body
 	UploadUserPhotosWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetUsersPreferences request
+	GetUsersPreferences(ctx context.Context, userID UserID, params *GetUsersPreferencesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UpdateUsersPreferencesWithBody request with any body
 	UpdateUsersPreferencesWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateUsersPreferences(ctx context.Context, userID UserID, body UpdateUsersPreferencesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetUsersProfessional request
+	GetUsersProfessional(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UpdateUsersProfessionalWithBody request with any body
 	UpdateUsersProfessionalWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateUsersProfessional(ctx context.Context, userID UserID, body UpdateUsersProfessionalJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SendOTPWithBody request with any body
+	SendOTPWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SendOTP(ctx context.Context, userID UserID, body SendOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// VerifyOTPWithBody request with any body
+	VerifyOTPWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	VerifyOTP(ctx context.Context, userID UserID, body VerifyOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// VerifyUserPhotosWithBody request with any body
+	VerifyUserPhotosWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetItems(ctx context.Context, itemType ItemType, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetItemsRequest(c.Server, itemType)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsertItemsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsertItemsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsertItems(ctx context.Context, body InsertItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsertItemsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) CreateUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -127,6 +193,18 @@ func (c *Client) CreateUsersWithBody(ctx context.Context, contentType string, bo
 
 func (c *Client) CreateUsers(ctx context.Context, body CreateUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateUsersRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetUsersPersonal(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUsersPersonalRequest(c.Server, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -173,6 +251,18 @@ func (c *Client) UploadUserPhotosWithBody(ctx context.Context, userID UserID, co
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetUsersPreferences(ctx context.Context, userID UserID, params *GetUsersPreferencesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUsersPreferencesRequest(c.Server, userID, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) UpdateUsersPreferencesWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateUsersPreferencesRequestWithBody(c.Server, userID, contentType, body)
 	if err != nil {
@@ -187,6 +277,18 @@ func (c *Client) UpdateUsersPreferencesWithBody(ctx context.Context, userID User
 
 func (c *Client) UpdateUsersPreferences(ctx context.Context, userID UserID, body UpdateUsersPreferencesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateUsersPreferencesRequest(c.Server, userID, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetUsersProfessional(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUsersProfessionalRequest(c.Server, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -219,6 +321,140 @@ func (c *Client) UpdateUsersProfessional(ctx context.Context, userID UserID, bod
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+func (c *Client) SendOTPWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSendOTPRequestWithBody(c.Server, userID, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SendOTP(ctx context.Context, userID UserID, body SendOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSendOTPRequest(c.Server, userID, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VerifyOTPWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVerifyOTPRequestWithBody(c.Server, userID, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VerifyOTP(ctx context.Context, userID UserID, body VerifyOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVerifyOTPRequest(c.Server, userID, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) VerifyUserPhotosWithBody(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewVerifyUserPhotosRequestWithBody(c.Server, userID, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewGetItemsRequest generates requests for GetItems
+func NewGetItemsRequest(server string, itemType ItemType) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "itemType", runtime.ParamLocationPath, itemType)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/getItems/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsertItemsRequest calls the generic InsertItems builder with application/json body
+func NewInsertItemsRequest(server string, body InsertItemsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInsertItemsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewInsertItemsRequestWithBody generates requests for InsertItems with any type of body
+func NewInsertItemsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/insertItems")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewCreateUsersRequest calls the generic CreateUsers builder with application/json body
@@ -257,6 +493,40 @@ func NewCreateUsersRequestWithBody(server string, contentType string, body io.Re
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetUsersPersonalRequest generates requests for GetUsersPersonal
+func NewGetUsersPersonalRequest(server string, userID UserID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/personalInfo", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -344,6 +614,62 @@ func NewUploadUserPhotosRequestWithBody(server string, userID UserID, contentTyp
 	return req, nil
 }
 
+// NewGetUsersPreferencesRequest generates requests for GetUsersPreferences
+func NewGetUsersPreferencesRequest(server string, userID UserID, params *GetUsersPreferencesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/preferences", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PreferenceType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "preferenceType", runtime.ParamLocationQuery, *params.PreferenceType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUpdateUsersPreferencesRequest calls the generic UpdateUsersPreferences builder with application/json body
 func NewUpdateUsersPreferencesRequest(server string, userID UserID, body UpdateUsersPreferencesJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -391,6 +717,40 @@ func NewUpdateUsersPreferencesRequestWithBody(server string, userID UserID, cont
 	return req, nil
 }
 
+// NewGetUsersProfessionalRequest generates requests for GetUsersProfessional
+func NewGetUsersProfessionalRequest(server string, userID UserID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/professionalInfo", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUpdateUsersProfessionalRequest calls the generic UpdateUsersProfessional builder with application/json body
 func NewUpdateUsersProfessionalRequest(server string, userID UserID, body UpdateUsersProfessionalJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -429,6 +789,136 @@ func NewUpdateUsersProfessionalRequestWithBody(server string, userID UserID, con
 	}
 
 	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSendOTPRequest calls the generic SendOTP builder with application/json body
+func NewSendOTPRequest(server string, userID UserID, body SendOTPJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSendOTPRequestWithBody(server, userID, "application/json", bodyReader)
+}
+
+// NewSendOTPRequestWithBody generates requests for SendOTP with any type of body
+func NewSendOTPRequestWithBody(server string, userID UserID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/sendOTP", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewVerifyOTPRequest calls the generic VerifyOTP builder with application/json body
+func NewVerifyOTPRequest(server string, userID UserID, body VerifyOTPJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewVerifyOTPRequestWithBody(server, userID, "application/json", bodyReader)
+}
+
+// NewVerifyOTPRequestWithBody generates requests for VerifyOTP with any type of body
+func NewVerifyOTPRequestWithBody(server string, userID UserID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/verifyOTP", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewVerifyUserPhotosRequestWithBody generates requests for VerifyUserPhotos with any type of body
+func NewVerifyUserPhotosRequestWithBody(server string, userID UserID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "userID", runtime.ParamLocationPath, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/users/%s/verifyPhotos", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -481,10 +971,21 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetItemsWithResponse request
+	GetItemsWithResponse(ctx context.Context, itemType ItemType, reqEditors ...RequestEditorFn) (*GetItemsResponse, error)
+
+	// InsertItemsWithBodyWithResponse request with any body
+	InsertItemsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InsertItemsResponse, error)
+
+	InsertItemsWithResponse(ctx context.Context, body InsertItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*InsertItemsResponse, error)
+
 	// CreateUsersWithBodyWithResponse request with any body
 	CreateUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUsersResponse, error)
 
 	CreateUsersWithResponse(ctx context.Context, body CreateUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateUsersResponse, error)
+
+	// GetUsersPersonalWithResponse request
+	GetUsersPersonalWithResponse(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*GetUsersPersonalResponse, error)
 
 	// UpdateUsersPersonalWithBodyWithResponse request with any body
 	UpdateUsersPersonalWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateUsersPersonalResponse, error)
@@ -494,20 +995,86 @@ type ClientWithResponsesInterface interface {
 	// UploadUserPhotosWithBodyWithResponse request with any body
 	UploadUserPhotosWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UploadUserPhotosResponse, error)
 
+	// GetUsersPreferencesWithResponse request
+	GetUsersPreferencesWithResponse(ctx context.Context, userID UserID, params *GetUsersPreferencesParams, reqEditors ...RequestEditorFn) (*GetUsersPreferencesResponse, error)
+
 	// UpdateUsersPreferencesWithBodyWithResponse request with any body
 	UpdateUsersPreferencesWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateUsersPreferencesResponse, error)
 
 	UpdateUsersPreferencesWithResponse(ctx context.Context, userID UserID, body UpdateUsersPreferencesJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateUsersPreferencesResponse, error)
 
+	// GetUsersProfessionalWithResponse request
+	GetUsersProfessionalWithResponse(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*GetUsersProfessionalResponse, error)
+
 	// UpdateUsersProfessionalWithBodyWithResponse request with any body
 	UpdateUsersProfessionalWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateUsersProfessionalResponse, error)
 
 	UpdateUsersProfessionalWithResponse(ctx context.Context, userID UserID, body UpdateUsersProfessionalJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateUsersProfessionalResponse, error)
+
+	// SendOTPWithBodyWithResponse request with any body
+	SendOTPWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendOTPResponse, error)
+
+	SendOTPWithResponse(ctx context.Context, userID UserID, body SendOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*SendOTPResponse, error)
+
+	// VerifyOTPWithBodyWithResponse request with any body
+	VerifyOTPWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VerifyOTPResponse, error)
+
+	VerifyOTPWithResponse(ctx context.Context, userID UserID, body VerifyOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*VerifyOTPResponse, error)
+
+	// VerifyUserPhotosWithBodyWithResponse request with any body
+	VerifyUserPhotosWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VerifyUserPhotosResponse, error)
+}
+
+type GetItemsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GetItemsResponse
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetItemsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetItemsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type InsertItemsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsertItemsResponse
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r InsertItemsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsertItemsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type CreateUsersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON204      *CreateUsersResponse
 	JSON400      *BadRequestError
 	JSON401      *UnauthorizedError
 	JSON403      *ForbiddenError
@@ -524,6 +1091,33 @@ func (r CreateUsersResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetUsersPersonalResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UsersPersonalInfoResponse
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetUsersPersonalResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetUsersPersonalResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -580,6 +1174,33 @@ func (r UploadUserPhotosResponse) StatusCode() int {
 	return 0
 }
 
+type GetUsersPreferencesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UsersPreferencesResponse
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetUsersPreferencesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetUsersPreferencesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type UpdateUsersPreferencesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -599,6 +1220,33 @@ func (r UpdateUsersPreferencesResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r UpdateUsersPreferencesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetUsersProfessionalResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UsersProfessionalInfoResponse
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetUsersProfessionalResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetUsersProfessionalResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -630,6 +1278,110 @@ func (r UpdateUsersProfessionalResponse) StatusCode() int {
 	return 0
 }
 
+type SendOTPResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r SendOTPResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SendOTPResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type VerifyOTPResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r VerifyOTPResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r VerifyOTPResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type VerifyUserPhotosResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON403      *ForbiddenError
+	JSON404      *NotFoundError
+	JSON500      *InternalServerError
+}
+
+// Status returns HTTPResponse.Status
+func (r VerifyUserPhotosResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r VerifyUserPhotosResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// GetItemsWithResponse request returning *GetItemsResponse
+func (c *ClientWithResponses) GetItemsWithResponse(ctx context.Context, itemType ItemType, reqEditors ...RequestEditorFn) (*GetItemsResponse, error) {
+	rsp, err := c.GetItems(ctx, itemType, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetItemsResponse(rsp)
+}
+
+// InsertItemsWithBodyWithResponse request with arbitrary body returning *InsertItemsResponse
+func (c *ClientWithResponses) InsertItemsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InsertItemsResponse, error) {
+	rsp, err := c.InsertItemsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsertItemsResponse(rsp)
+}
+
+func (c *ClientWithResponses) InsertItemsWithResponse(ctx context.Context, body InsertItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*InsertItemsResponse, error) {
+	rsp, err := c.InsertItems(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsertItemsResponse(rsp)
+}
+
 // CreateUsersWithBodyWithResponse request with arbitrary body returning *CreateUsersResponse
 func (c *ClientWithResponses) CreateUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUsersResponse, error) {
 	rsp, err := c.CreateUsersWithBody(ctx, contentType, body, reqEditors...)
@@ -645,6 +1397,15 @@ func (c *ClientWithResponses) CreateUsersWithResponse(ctx context.Context, body 
 		return nil, err
 	}
 	return ParseCreateUsersResponse(rsp)
+}
+
+// GetUsersPersonalWithResponse request returning *GetUsersPersonalResponse
+func (c *ClientWithResponses) GetUsersPersonalWithResponse(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*GetUsersPersonalResponse, error) {
+	rsp, err := c.GetUsersPersonal(ctx, userID, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetUsersPersonalResponse(rsp)
 }
 
 // UpdateUsersPersonalWithBodyWithResponse request with arbitrary body returning *UpdateUsersPersonalResponse
@@ -673,6 +1434,15 @@ func (c *ClientWithResponses) UploadUserPhotosWithBodyWithResponse(ctx context.C
 	return ParseUploadUserPhotosResponse(rsp)
 }
 
+// GetUsersPreferencesWithResponse request returning *GetUsersPreferencesResponse
+func (c *ClientWithResponses) GetUsersPreferencesWithResponse(ctx context.Context, userID UserID, params *GetUsersPreferencesParams, reqEditors ...RequestEditorFn) (*GetUsersPreferencesResponse, error) {
+	rsp, err := c.GetUsersPreferences(ctx, userID, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetUsersPreferencesResponse(rsp)
+}
+
 // UpdateUsersPreferencesWithBodyWithResponse request with arbitrary body returning *UpdateUsersPreferencesResponse
 func (c *ClientWithResponses) UpdateUsersPreferencesWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateUsersPreferencesResponse, error) {
 	rsp, err := c.UpdateUsersPreferencesWithBody(ctx, userID, contentType, body, reqEditors...)
@@ -688,6 +1458,15 @@ func (c *ClientWithResponses) UpdateUsersPreferencesWithResponse(ctx context.Con
 		return nil, err
 	}
 	return ParseUpdateUsersPreferencesResponse(rsp)
+}
+
+// GetUsersProfessionalWithResponse request returning *GetUsersProfessionalResponse
+func (c *ClientWithResponses) GetUsersProfessionalWithResponse(ctx context.Context, userID UserID, reqEditors ...RequestEditorFn) (*GetUsersProfessionalResponse, error) {
+	rsp, err := c.GetUsersProfessional(ctx, userID, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetUsersProfessionalResponse(rsp)
 }
 
 // UpdateUsersProfessionalWithBodyWithResponse request with arbitrary body returning *UpdateUsersProfessionalResponse
@@ -707,6 +1486,115 @@ func (c *ClientWithResponses) UpdateUsersProfessionalWithResponse(ctx context.Co
 	return ParseUpdateUsersProfessionalResponse(rsp)
 }
 
+// SendOTPWithBodyWithResponse request with arbitrary body returning *SendOTPResponse
+func (c *ClientWithResponses) SendOTPWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SendOTPResponse, error) {
+	rsp, err := c.SendOTPWithBody(ctx, userID, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSendOTPResponse(rsp)
+}
+
+func (c *ClientWithResponses) SendOTPWithResponse(ctx context.Context, userID UserID, body SendOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*SendOTPResponse, error) {
+	rsp, err := c.SendOTP(ctx, userID, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSendOTPResponse(rsp)
+}
+
+// VerifyOTPWithBodyWithResponse request with arbitrary body returning *VerifyOTPResponse
+func (c *ClientWithResponses) VerifyOTPWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VerifyOTPResponse, error) {
+	rsp, err := c.VerifyOTPWithBody(ctx, userID, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVerifyOTPResponse(rsp)
+}
+
+func (c *ClientWithResponses) VerifyOTPWithResponse(ctx context.Context, userID UserID, body VerifyOTPJSONRequestBody, reqEditors ...RequestEditorFn) (*VerifyOTPResponse, error) {
+	rsp, err := c.VerifyOTP(ctx, userID, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVerifyOTPResponse(rsp)
+}
+
+// VerifyUserPhotosWithBodyWithResponse request with arbitrary body returning *VerifyUserPhotosResponse
+func (c *ClientWithResponses) VerifyUserPhotosWithBodyWithResponse(ctx context.Context, userID UserID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*VerifyUserPhotosResponse, error) {
+	rsp, err := c.VerifyUserPhotosWithBody(ctx, userID, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseVerifyUserPhotosResponse(rsp)
+}
+
+// ParseGetItemsResponse parses an HTTP response from a GetItemsWithResponse call
+func ParseGetItemsResponse(rsp *http.Response) (*GetItemsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetItemsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GetItemsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsertItemsResponse parses an HTTP response from a InsertItemsWithResponse call
+func ParseInsertItemsResponse(rsp *http.Response) (*InsertItemsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsertItemsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsertItemsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateUsersResponse parses an HTTP response from a CreateUsersWithResponse call
 func ParseCreateUsersResponse(rsp *http.Response) (*CreateUsersResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -721,6 +1609,13 @@ func ParseCreateUsersResponse(rsp *http.Response) (*CreateUsersResponse, error) 
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest CreateUsersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest BadRequestError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -741,6 +1636,67 @@ func ParseCreateUsersResponse(rsp *http.Response) (*CreateUsersResponse, error) 
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetUsersPersonalResponse parses an HTTP response from a GetUsersPersonalWithResponse call
+func ParseGetUsersPersonalResponse(rsp *http.Response) (*GetUsersPersonalResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetUsersPersonalResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UsersPersonalInfoResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest InternalServerError
@@ -848,6 +1804,67 @@ func ParseUploadUserPhotosResponse(rsp *http.Response) (*UploadUserPhotosRespons
 	return response, nil
 }
 
+// ParseGetUsersPreferencesResponse parses an HTTP response from a GetUsersPreferencesWithResponse call
+func ParseGetUsersPreferencesResponse(rsp *http.Response) (*GetUsersPreferencesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetUsersPreferencesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UsersPreferencesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseUpdateUsersPreferencesResponse parses an HTTP response from a UpdateUsersPreferencesWithResponse call
 func ParseUpdateUsersPreferencesResponse(rsp *http.Response) (*UpdateUsersPreferencesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -895,6 +1912,67 @@ func ParseUpdateUsersPreferencesResponse(rsp *http.Response) (*UpdateUsersPrefer
 	return response, nil
 }
 
+// ParseGetUsersProfessionalResponse parses an HTTP response from a GetUsersProfessionalWithResponse call
+func ParseGetUsersProfessionalResponse(rsp *http.Response) (*GetUsersProfessionalResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetUsersProfessionalResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UsersProfessionalInfoResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseUpdateUsersProfessionalResponse parses an HTTP response from a UpdateUsersProfessionalWithResponse call
 func ParseUpdateUsersProfessionalResponse(rsp *http.Response) (*UpdateUsersProfessionalResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -929,6 +2007,168 @@ func ParseUpdateUsersProfessionalResponse(rsp *http.Response) (*UpdateUsersProfe
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSendOTPResponse parses an HTTP response from a SendOTPWithResponse call
+func ParseSendOTPResponse(rsp *http.Response) (*SendOTPResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SendOTPResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseVerifyOTPResponse parses an HTTP response from a VerifyOTPWithResponse call
+func ParseVerifyOTPResponse(rsp *http.Response) (*VerifyOTPResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &VerifyOTPResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalServerError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseVerifyUserPhotosResponse parses an HTTP response from a VerifyUserPhotosWithResponse call
+func ParseVerifyUserPhotosResponse(rsp *http.Response) (*VerifyUserPhotosResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &VerifyUserPhotosResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ForbiddenError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFoundError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest InternalServerError
