@@ -392,23 +392,22 @@ components:
           type: string
           description: Name of the user's company
         jobTitle:
-          type: string
+          $ref: "#/components/schemas/items"
           description: Job title of the user
         industryType:
-          type: string
+          $ref: "#/components/schemas/items"
           description: Industry in which the user works
-        education:
-          type: string
+        educationQualification:
+          $ref: "#/components/schemas/items"
           description: User's highest education level
         college:
-          type: string
+          $ref: "#/components/schemas/items"
           description: Name of the user's college/university
         blockedCompanies:
           type: array
           description: List of companies the user wants to block
           items:
-            type: string
-            example: google
+            $ref: "#/components/schemas/items"
     UpdateUsersPersonalInfo:
       type: object
       properties:
@@ -428,22 +427,17 @@ components:
         height:
           type: number
         hometown:
-          type: string
-          example: Delhi
+          $ref: "#/components/schemas/items"
         religion:
-          type: string
-          example: Hindu
+          $ref: "#/components/schemas/items"
         zodiacSign:
-          type: string
-          example: Leo
+          $ref: "#/components/schemas/items"
         languages:
           type: array
           items:
-            type: string
-            example: Hindi
+            $ref: "#/components/schemas/items"
         caste:
-          type: string
-          example: TBD
+          $ref: "#/components/schemas/items"
     UpdateUsersPreferences:
       type: array
       items:

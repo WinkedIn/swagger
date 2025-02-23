@@ -62,7 +62,7 @@ type Preferences struct {
 
 // UpdateUsersPersonalInfo defines model for UpdateUsersPersonalInfo.
 type UpdateUsersPersonalInfo struct {
-	Caste *string `json:"caste,omitempty"`
+	Caste *Items `json:"caste,omitempty"`
 
 	// Dob Date of birth (YYYY-MM-DD)
 	Dob *openapi_types.Date `json:"dob,omitempty"`
@@ -71,15 +71,15 @@ type UpdateUsersPersonalInfo struct {
 	Email *openapi_types.Email `json:"email,omitempty"`
 
 	// Gender Gender options available for users
-	Gender    *Gender   `json:"gender,omitempty"`
-	Height    *float32  `json:"height,omitempty"`
-	Hometown  *string   `json:"hometown,omitempty"`
-	Languages *[]string `json:"languages,omitempty"`
+	Gender    *Gender  `json:"gender,omitempty"`
+	Height    *float32 `json:"height,omitempty"`
+	Hometown  *Items   `json:"hometown,omitempty"`
+	Languages *[]Items `json:"languages,omitempty"`
 
 	// MobileNumber User's mobile number
 	MobileNumber *string `json:"mobileNumber,omitempty"`
-	Religion     *string `json:"religion,omitempty"`
-	ZodiacSign   *string `json:"zodiacSign,omitempty"`
+	Religion     *Items  `json:"religion,omitempty"`
+	ZodiacSign   *Items  `json:"zodiacSign,omitempty"`
 }
 
 // UpdateUsersPreferences defines model for UpdateUsersPreferences.
@@ -88,22 +88,14 @@ type UpdateUsersPreferences = []Preferences
 // UpdateUsersProfessionalInfo defines model for UpdateUsersProfessionalInfo.
 type UpdateUsersProfessionalInfo struct {
 	// BlockedCompanies List of companies the user wants to block
-	BlockedCompanies *[]string `json:"blockedCompanies,omitempty"`
-
-	// College Name of the user's college/university
-	College *string `json:"college,omitempty"`
+	BlockedCompanies *[]Items `json:"blockedCompanies,omitempty"`
+	College          *Items   `json:"college,omitempty"`
 
 	// CompanyName Name of the user's company
-	CompanyName *string `json:"companyName,omitempty"`
-
-	// Education User's highest education level
-	Education *string `json:"education,omitempty"`
-
-	// IndustryType Industry in which the user works
-	IndustryType *string `json:"industryType,omitempty"`
-
-	// JobTitle Job title of the user
-	JobTitle *string `json:"jobTitle,omitempty"`
+	CompanyName            *string `json:"companyName,omitempty"`
+	EducationQualification *Items  `json:"educationQualification,omitempty"`
+	IndustryType           *Items  `json:"industryType,omitempty"`
+	JobTitle               *Items  `json:"jobTitle,omitempty"`
 }
 
 // UserPhotos defines model for UserPhotos.
@@ -118,7 +110,7 @@ type UserPhotos struct {
 // UsersPersonalInfo defines model for UsersPersonalInfo.
 type UsersPersonalInfo struct {
 	Age   *float32 `json:"age,omitempty"`
-	Caste *string  `json:"caste,omitempty"`
+	Caste *Items   `json:"caste,omitempty"`
 
 	// Dob Date of birth (YYYY-MM-DD)
 	Dob *openapi_types.Date `json:"dob,omitempty"`
@@ -128,19 +120,19 @@ type UsersPersonalInfo struct {
 	FirstName string               `json:"firstName"`
 
 	// Gender Gender options available for users
-	Gender    *Gender   `json:"gender,omitempty"`
-	Height    *float32  `json:"height,omitempty"`
-	Hometown  *string   `json:"hometown,omitempty"`
-	Languages *[]string `json:"languages,omitempty"`
-	LastName  string    `json:"lastName"`
-	Latitude  *string   `json:"latitude,omitempty"`
-	Longitude *string   `json:"longitude,omitempty"`
+	Gender    *Gender  `json:"gender,omitempty"`
+	Height    *float32 `json:"height,omitempty"`
+	Hometown  *Items   `json:"hometown,omitempty"`
+	Languages *[]Items `json:"languages,omitempty"`
+	LastName  string   `json:"lastName"`
+	Latitude  *string  `json:"latitude,omitempty"`
+	Longitude *string  `json:"longitude,omitempty"`
 
 	// MobileNumber User's mobile number
 	MobileNumber *string `json:"mobileNumber,omitempty"`
-	Religion     *string `json:"religion,omitempty"`
+	Religion     *Items  `json:"religion,omitempty"`
 	UserID       ID      `json:"userID"`
-	ZodiacSign   *string `json:"zodiacSign,omitempty"`
+	ZodiacSign   *Items  `json:"zodiacSign,omitempty"`
 }
 
 // UsersPreferences defines model for UsersPreferences.
@@ -152,21 +144,13 @@ type UsersPreferences struct {
 // UsersProfessionalInfo defines model for UsersProfessionalInfo.
 type UsersProfessionalInfo struct {
 	// BlockedCompanies List of companies the user wants to block
-	BlockedCompanies *[]string `json:"blockedCompanies,omitempty"`
-
-	// College Name of the user's college/university
-	College     *string `json:"college,omitempty"`
-	CompanyName *string `json:"companyName,omitempty"`
-
-	// Education User's highest education level
-	Education *string `json:"education,omitempty"`
-
-	// IndustryType Industry in which the user works
-	IndustryType *string `json:"industryType,omitempty"`
-
-	// JobTitle Job title of the user
-	JobTitle *string `json:"jobTitle,omitempty"`
-	UserID   ID      `json:"userID"`
+	BlockedCompanies       *[]Items `json:"blockedCompanies,omitempty"`
+	College                *Items   `json:"college,omitempty"`
+	CompanyName            *string  `json:"companyName,omitempty"`
+	EducationQualification *Items   `json:"educationQualification,omitempty"`
+	IndustryType           *Items   `json:"industryType,omitempty"`
+	JobTitle               *Items   `json:"jobTitle,omitempty"`
+	UserID                 ID       `json:"userID"`
 }
 
 // Items defines model for items.
