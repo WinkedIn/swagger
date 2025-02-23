@@ -1,0 +1,7 @@
+# IDE specific files
+.idea/
+.vscode/
+.DS_Store
+
+# Vendor files.
+vendor/

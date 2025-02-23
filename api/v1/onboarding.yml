@@ -62,7 +62,7 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdateUsersProfessionalInfo"
       responses:
-          "204":
+          "201":
             description: Successfully updated the user's professional information
           "400":
             $ref: "#/components/responses/BadRequestError"
@@ -72,6 +72,26 @@ paths:
             $ref: "#/components/responses/ForbiddenError"
           "500":
             $ref: "#/components/responses/InternalServerError"
+    get:
+      summary: fetch user's professional information
+      operationId: getUsersProfessional
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      responses:
+        "200":
+          $ref: "#/components/responses/UsersProfessionalInfoResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /v1/users/{userID}/personalInfo:
     put:
       summary: Update user's personal information
@@ -88,7 +108,7 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdateUsersPersonalInfo"
       responses:
-          "204":
+          "201":
             description: Successfully updated the user's personal information
           "400":
             $ref: "#/components/responses/BadRequestError"   
@@ -98,6 +118,26 @@ paths:
             $ref: "#/components/responses/ForbiddenError"
           "500":
             $ref: "#/components/responses/InternalServerError"
+    get:
+      summary: fetch user's personal information
+      operationId: getUsersPersonal
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      responses:
+        "200":
+          $ref: "#/components/responses/UsersPersonalInfoResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /v1/users/{userID}/preferences:
     post:
       summary: Add/Update user's preferences
@@ -114,7 +154,7 @@ paths:
             schema:
               $ref: "#/components/schemas/UpdateUsersPreferences"
       responses:
-          "204":
+          "200":
             description: Successfully updated the user's personal information
           "400":
             $ref: "#/components/responses/BadRequestError"
@@ -124,6 +164,27 @@ paths:
             $ref: "#/components/responses/ForbiddenError"
           "500":
             $ref: "#/components/responses/InternalServerError"
+    get:
+      summary: fetch user's preferences
+      operationId: getUsersPreferences
+      tags:
+        - Users
+      parameters:
+        - $ref: "#/components/parameters/userID"
+        - $ref: "#/components/parameters/PreferenceType"
+      responses:
+        "200":
+          $ref: "#/components/responses/UsersPreferencesResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /v1/users/{userID}/photos:
     post:
       summary: Upload user photos
@@ -151,7 +212,126 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+################################################### VERIFICATION #########################
+  /v1/users/{userID}/sendOTP:
+    post:
+      summary: Send OTP to user
+      operationId: sendOTP
+      tags:
+        - verification
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Send OTP to user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendOTP"
+      responses:
+        "200":
+          $ref: "#/components/responses/SendOTPResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/verifyOTP:
+    post:
+      summary: Verify OTP
+      operationId: verifyOTP
+      tags:
+        - verification
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Verify OTP entered by user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/verifyOTP"
+      responses:
+        "200":
+          $ref: "#/components/responses/VerifyOTPResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /v1/users/{userID}/verifyPhotos:
+    post:
+      summary: Verify users photos
+      operationId: verifyUserPhotos
+      tags:
+        - verification
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      requestBody:
+        description: Upload an image (max 10MB). One photo should be marked as default.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/verifyPhoto"
+      responses:
+        "200":
+          $ref: "#/components/responses/VerifyPhotoResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "413":
+          description: Payload too large (exceeds 10MB)
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
+
+########################## OTHER ##########################
+  /v1/getItems/{itemType}:
+    post:
+      summary: Get list of miscellaneous items
+      operationId: getItems
+      tags:
+        - Other
+      parameters:
+        - $ref: "#/components/parameters/itemType"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetItemsResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /v1/insertItems:
+    post:
+      summary: insert miscellaneous items
+      operationId: insertItems
+      tags:
+        - Other
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsertItems"
+      responses:
+        "200":
+          $ref: "#/components/responses/InsertItemsResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     BasicAuth:
@@ -170,9 +350,10 @@ components:
           type: string
         message:
           type: string      
-    UserID:
+    ID:
       type: string
       format: uuid
+      example: e9be8842-b021-4fbd-b56a-d0c4fd4279f9
     Gender:
       type: string
       enum:
@@ -191,8 +372,13 @@ components:
           items:
            $ref: "#/components/schemas/PreferenceValue"
     PreferenceValue:
-      type: string
-      example: sober
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: sober
 
     CreateUsers:
       type: object
@@ -202,9 +388,6 @@ components:
     UpdateUsersProfessionalInfo:
       type: object
       properties:
-        userid:
-          type: string
-          description: Unique identifier for the user
         companyName:
           type: string
           description: Name of the user's company
@@ -225,6 +408,7 @@ components:
           description: List of companies the user wants to block
           items:
             type: string
+            example: google
     UpdateUsersPersonalInfo:
       type: object
       properties:
@@ -243,6 +427,23 @@ components:
           $ref: "#/components/schemas/Gender"
         height:
           type: number
+        hometown:
+          type: string
+          example: Delhi
+        religion:
+          type: string
+          example: Hindu
+        zodiacSign:
+          type: string
+          example: Leo
+        languages:
+          type: array
+          items:
+            type: string
+            example: Hindi
+        caste:
+          type: string
+          example: TBD
     UpdateUsersPreferences:
       type: array
       items:
@@ -259,6 +460,116 @@ components:
         defaultPhoto:
           type: string
           description: Filename of the photo to be set as default
+    UsersProfessionalInfo:
+      allOf:
+        - $ref: "#/components/schemas/UpdateUsersProfessionalInfo"
+        - type: object
+          required:
+            - userID
+          properties:
+            userID:
+              $ref: "#/components/schemas/ID"
+            companyName:
+              type: string
+              example: Google
+    UsersPersonalInfo:
+      allOf:
+        - $ref: "#/components/schemas/UpdateUsersPersonalInfo"
+        - type: object
+          required:
+            - userID
+            - firstName
+            - lastName
+          properties:
+            userID:
+              $ref: "#/components/schemas/ID"
+            firstName:
+              type: string
+              example: James
+            lastName:
+              type: string
+              example: Bond
+            age:
+              type: number
+              example: 19
+            longitude:
+              type: string
+              example: 21.348024
+            latitude:
+              type: string
+              example: 24.831610
+
+    UsersPreferences:
+      type: object
+      required:
+        - userID
+        - preferences
+      properties:
+        userID:
+          $ref: "#/components/schemas/ID"
+        preferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/Preferences"
+    sendOTP:
+      type: object
+      properties:
+        medium:
+          type: string
+          example: email
+        value:
+          type: string
+          example: abc@abc.com
+    verifyOTP:
+      type: object
+      properties:
+        otp:
+          type: number
+          example: 123456
+    verifyPhoto:
+      type: object
+      required:
+        - photo
+        - posePhotoID
+      properties:
+        photo:
+          type: string
+          format: binary
+        posePhotoID:
+          $ref: "#/components/schemas/ID"
+    GetItems:
+      type: object
+      required:
+        - itemTypeID
+        - itemTypeName
+        - items
+      properties:
+        itemTypeID:
+          $ref: "#/components/schemas/ID"
+        itemTypeName:
+          type: string
+          example: job_titles
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/items"
+    items:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        name:
+          type: string
+          example: senior software engineer
+    InsertItems:
+      type: object
+      properties:
+        itemTypeID:
+          $ref: "#/components/schemas/ID"
+        newItems:
+          type: string
+          example: QA
+
   parameters:
     page:
       name: page
@@ -284,12 +595,66 @@ components:
       description: ID of the current user
       required: true
       schema:
-        $ref: "#/components/schemas/UserID"
+        $ref: "#/components/schemas/ID"
+    PreferenceType:
+      name: preferenceType
+      in: query
+      description: preference type
+      required: false
+      schema:
+        type: string
+    itemType:
+      name: itemType
+      description: type of items
+      required: true
+      in: path
+      schema:
+        type: string
 
   responses:
     CreateUsersResponse: #204
      description: user created
-           
+     content:
+       application/json:
+         schema:
+           $ref: "#/components/schemas/ID"
+    UsersProfessionalInfoResponse: #200
+      description: Get users professional info
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsersProfessionalInfo"
+    UsersPersonalInfoResponse: #200
+      description: Get users personal info
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsersPersonalInfo"
+    UsersPreferencesResponse: #200
+      description: Get users preferences
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UsersPreferences"
+    SendOTPResponse: #200
+      description: OTP sent
+    VerifyOTPResponse: #200
+      description: OTP verified
+    GetItemsResponse: #200
+      description: list of miscellaneous items
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetItems"
+    InsertItemsResponse: #200
+      description: insert items
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetItems"
+
+    VerifyPhotoResponse: #200
+      description: Photos verified successfully
     BadRequestError: # 400
       description: The request was unacceptable either due to an invalid/missing parameter or body
       content:
